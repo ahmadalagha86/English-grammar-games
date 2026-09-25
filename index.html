@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الضمائر الشخصية - English Subject Pronouns</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+            min-height: 100vh;
+        }
+        .en-font {
+            font-family: 'Tajawal', sans-serif;
+        }
+        .card-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-subtle {
+            animation: pulse-subtle 3s infinite ease-in-out;
+        }
+        .drag-over {
+            border-color: #f59e0b !important;
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="text-gray-800 flex flex-col justify-between p-2 sm:p-4 md:p-6 min-h-screen">
+
+    <!-- Header Section -->
+    <header class="max-w-5xl mx-auto w-full mb-4">
+        <div class="glass rounded-2xl p-4 sm:p-6 text-white flex flex-col md:flex-row justify-between items-center gap-4 shadow-2xl">
+            <div class="text-center md:text-right">
+                <div class="inline-block bg-yellow-400 text-indigo-950 font-black px-3 py-1 rounded-full text-xs sm:text-sm mb-2 shadow">
+                    المنهاج السوري - الصف الخامس والسادس
+                </div>
+                <h1 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-wide text-yellow-300">
+                    مغليقة الضمائر الشخصية <span class="en-font text-white block md:inline text-xl sm:text-2xl">(Subject Pronouns)</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-indigo-100 mt-1">تفاعل، استمع، وتعلّم مطابقة الضمائر مع الفاعل والأشكال المفردة والجمع!</p>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="flex items-center gap-3 sm:gap-4 bg-indigo-950/60 p-3 rounded-xl border border-indigo-400/30">
+                <div class="text-center px-2">
+                    <span class="block text-xs text-indigo-200 font-bold">النقاط</span>
+                    <span id="score-display" class="text-2xl sm:text-3xl font-black text-yellow-400">0</span>
+                </div>
+                <div class="h-8 w-px bg-indigo-700"></div>
+                <div class="text-center px-2">
+                    <span class="block text-xs text-indigo-200 font-bold">التتابع</span>
+                    <span id="streak-display" class="text-2xl sm:text-3xl font-black text-orange-400">🔥 0</span>
+                </div>
+                <div class="h-8 w-px bg-indigo-700"></div>
+                <button id="rule-btn" onclick="openRulesModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 sm:px-3 sm:py-2 rounded-lg flex flex-col items-center justify-center transition text-xs font-bold shadow">
+                    <i class="fa-solid fa-book-open text-base mb-1 text-yellow-300"></i>
+                    القواعد
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Tabs for Modes -->
+    <main class="max-w-5xl mx-auto w-full flex-grow flex flex-col justify-center">
+        <div class="flex justify-center gap-2 sm:gap-4 mb-6 flex-wrap">
+            <button onclick="switchMode('matching')" id="tab-matching" class="mode-tab bg-yellow-400 text-indigo-950 font-black px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-sm sm:text-base border-2 border-yellow-300">
+                <i class="fa-solid fa-boxes-packing ml-2"></i>١. تصنيف الأسماء
+            </button>
+            <button onclick="switchMode('fill')" id="tab-fill" class="mode-tab bg-indigo-800/80 hover:bg-indigo-700 text-white font-black px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-sm sm:text-base border-2 border-transparent">
+                <i class="fa-solid fa-pen-to-square ml-2"></i>٢. إكمال الجمل
+            </button>
+            <button onclick="switchMode('speed')" id="tab-speed" class="mode-tab bg-indigo-800/80 hover:bg-indigo-700 text-white font-black px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 text-sm sm:text-base border-2 border-transparent">
+                <i class="fa-solid fa-bolt ml-2"></i>٣. تحدي السرعة
+            </button>
+        </div>
+
+        <!-- MODE 1: MATCHING / CLASSIFICATION MODE -->
+        <section id="mode-matching" class="game-mode block">
+            <div class="glass-card rounded-3xl p-4 sm:p-8 card-shadow border border-white">
+                <div class="text-center mb-6">
+                    <h2 class="text-xl sm:text-2xl font-black text-indigo-950 mb-1">اسحب الاسم أو الكلمة وضمنها في سلة الضمير المناسب:</h2>
+                    <p class="text-xs sm:text-sm text-gray-600">يمكنك النقر على زر الصوت للاستماع للكلمة بالإنجليزية قبل سحبها!</p>
+                </div>
+
+                <!-- Word Cards Pool -->
+                <div id="words-pool" class="flex flex-wrap gap-3 justify-center min-h-[100px] p-4 bg-indigo-50/80 rounded-2xl border-2 border-dashed border-indigo-200 mb-8 items-center">
+                    <!-- Cards dynamically loaded -->
+                </div>
+
+                <!-- Pronoun Baskets -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4" id="baskets-container">
+                    <!-- Baskets generated by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MODE 2: FILL IN THE BLANKS MODE -->
+        <section id="mode-fill" class="game-mode hidden">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 card-shadow border border-white text-center">
+                <div class="inline-block bg-indigo-100 text-indigo-900 font-bold px-4 py-1 rounded-full text-xs sm:text-sm mb-4">
+                    اختر الضمير الذي يستبدل الفاعل المذكور بين القوسين
+                </div>
+
+                <div class="my-6 min-h-[140px] flex flex-col justify-center items-center bg-indigo-50/60 p-6 rounded-2xl border border-indigo-100">
+                    <div class="flex items-center justify-center gap-3 mb-3">
+                        <span id="fill-sentence" class="en-font text-2xl sm:text-3xl md:text-4xl font-black text-indigo-950 leading-relaxed" dir="ltr">
+                            ... is playing football.
+                        </span>
+                        <button onclick="speakSentence()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow transition">
+                            <i class="fa-solid fa-volume-high text-lg"></i>
+                        </button>
+                    </div>
+                    <div id="fill-context" class="text-base sm:text-lg font-bold text-gray-700 mt-2">
+                        الفاعل: (Ahmad)
+                    </div>
+                </div>
+
+                <!-- Multiple Choice Options -->
+                <div id="fill-options" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto">
+                    <!-- Dynamic Buttons -->
+                </div>
+            </div>
+        </section>
+
+        <!-- MODE 3: SPEED CHALLENGE MODE -->
+        <section id="mode-speed" class="game-mode hidden">
+            <div class="glass-card rounded-3xl p-6 sm:p-8 card-shadow border border-white text-center">
+                <!-- Progress & Timer Bar -->
+                <div class="w-full bg-gray-200 h-4 rounded-full mb-6 overflow-hidden border">
+                    <div id="speed-timer-bar" class="bg-gradient-to-r from-red-500 via-yellow-400 to-green-500 h-full w-full transition-all duration-100 ease-linear"></div>
+                </div>
+
+                <div class="flex justify-between items-center mb-4 text-sm font-bold text-gray-600">
+                    <span>الوقت المتبقي: <span id="timer-sec" class="text-red-600 font-black text-lg">10</span>s</span>
+                    <span>السؤال: <span id="speed-q-num" class="text-indigo-900 font-black">1</span> / 10</span>
+                </div>
+
+                <div class="my-6 bg-yellow-50 p-6 rounded-2xl border-2 border-yellow-200">
+                    <div class="text-sm text-yellow-800 font-bold mb-2">ما هو الضمير المناسب للكلمة التالية؟</div>
+                    <div id="speed-word" class="en-font text-3xl sm:text-5xl font-black text-indigo-900 mb-2" dir="ltr">
+                        The Teachers
+                    </div>
+                    <div id="speed-subtext" class="text-gray-600 font-bold text-sm sm:text-base">
+                        ( المعلمون - اسم جمع )
+                    </div>
+                </div>
+
+                <div id="speed-options" class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-2xl mx-auto">
+                    <!-- Dynamic Options -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Motivational Positive Popup Modal -->
+    <div id="motivation-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center border-4 border-yellow-400 shadow-2xl transform transition-all animate-subtle relative overflow-hidden">
+            <!-- Background Decorative Stars -->
+            <div class="absolute -top-10 -left-10 text-yellow-300 opacity-20 text-8xl"><i class="fa-solid fa-star"></i></div>
+            <div class="absolute -bottom-10 -right-10 text-indigo-300 opacity-20 text-8xl"><i class="fa-solid fa-award"></i></div>
+
+            <div class="w-20 h-20 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner border-2 border-yellow-300">
+                <i class="fa-solid fa-trophy animate-bounce"></i>
+            </div>
+
+            <h3 id="modal-title" class="text-2xl sm:text-3xl font-black text-indigo-950 mb-2">إجابة رائعة! 🎉</h3>
+            <p id="modal-arabic-phrase" class="text-xl sm:text-2xl font-bold text-emerald-600 mb-4 py-2 px-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                "ممتاز يا بطل المستقبل!"
+            </p>
+
+            <div id="modal-explanation" class="text-xs sm:text-sm text-gray-600 mb-6 bg-gray-50 p-3 rounded-lg text-right leading-relaxed border">
+                <!-- Detailed explanation dynamically added -->
+            </div>
+
+            <button onclick="closeMotivationModal()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-3 rounded-xl shadow-lg text-lg transition">
+                متابعة التحدي <i class="fa-solid fa-arrow-left mr-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Rules & Grammar Summary Modal -->
+    <div id="rules-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border-2 border-indigo-200 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                <h3 class="text-xl font-black text-indigo-950 flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-yellow-500"></i>
+                    قواعد الضمائر الشخصية (Subject Pronouns)
+                </h3>
+                <button onclick="closeRulesModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">&times;</button>
+            </div>
+
+            <div class="space-y-3 text-sm leading-relaxed text-gray-700">
+                <div class="p-3 bg-indigo-50 rounded-xl border-r-4 border-indigo-600">
+                    <span class="font-black text-indigo-900 text-base">1. الضمير (I) - أنا:</span>
+                    <p>يُستخدم عندما تتحدث عن نفسك مفرد. مثال: <span class="en-font font-bold">I am a student.</span></p>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-xl border-r-4 border-blue-600">
+                    <span class="font-black text-blue-900 text-base">2. الضمير (He) - هو:</span>
+                    <p>يستبدل الفاعل المفرد المذكر (ولد/رجل). أمثلة المنهاج: <span class="en-font font-bold">Ahmad, Sami, My father, The teacher</span>.</p>
+                </div>
+                <div class="p-3 bg-pink-50 rounded-xl border-r-4 border-pink-600">
+                    <span class="font-black text-pink-900 text-base">3. الضمير (She) - هي:</span>
+                    <p>يستبدل الفاعل المفرد المؤنث (بنت/امرأة). أمثلة المنهاج: <span class="en-font font-bold">Maya, Salma, My mother, The doctor</span>.</p>
+                </div>
+                <div class="p-3 bg-emerald-50 rounded-xl border-r-4 border-emerald-600">
+                    <span class="font-black text-emerald-900 text-base">4. الضمير (It) - هو / هي لغير العاقل المفرد:</span>
+                    <p>يُستخدم للشيء المفرد أو الحيوان أو المكان. أمثلة: <span class="en-font font-bold">Damascus, Palmyra, The cat, The school, The book</span>.</p>
+                </div>
+                <div class="p-3 bg-purple-50 rounded-xl border-r-4 border-purple-600">
+                    <span class="font-black text-purple-900 text-base">5. الضمير (They) - هم / هُنَّ / هما:</span>
+                    <p>يُستخدم للجمع (عاقل أو غير عاقل!). أمثلة: <span class="en-font font-bold">The pupils, Ahmad and Sami, The books, The cats</span>.</p>
+                </div>
+                <div class="p-3 bg-orange-50 rounded-xl border-r-4 border-orange-600">
+                    <span class="font-black text-orange-900 text-base">6. الضمير (We) - نحن:</span>
+                    <p>يُستخدم للجمع الذي يتضمن المتكلم (أنا وشخص آخر). أمثلة: <span class="en-font font-bold">Sami and I, My family and I</span>.</p>
+                </div>
+                <div class="p-3 bg-teal-50 rounded-xl border-r-4 border-teal-600">
+                    <span class="font-black text-teal-900 text-base">7. الضمير (You) - أنتَ / أنتِ / أنتم:</span>
+                    <p>يُستخدم للمخاطب المفرد والجمع.</p>
+                </div>
+            </div>
+
+            <button onclick="closeRulesModal()" class="mt-6 w-full bg-indigo-900 text-white font-bold py-2.5 rounded-xl">فهمت القاعدة، لنعد للعب!</button>
+        </div>
+    </div>
+
+    <!-- Footer Information -->
+    <footer class="max-w-5xl mx-auto w-full text-center py-4 text-xs text-indigo-200">
+        مصممة خصيصاً لطلاب الصف الخامس والسادس الابتدائي - المنهاج السوري للغة الإنجليزية ❤️
+    </footer>
+
+    <!-- Audio Effects using Web Audio API -->
+    <script>
+        // Audio Synthesizer for SFX
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            },
+            playCorrect() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.3); // C6
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            },
+            playWrong() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(130, now + 0.25);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        };
+
+        // Text-To-Speech Pronunciation Helper
+        function speakEnglish(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85; // Slightly slower for primary students
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Data Models aligned with Syrian Primary Curriculum
+        const vocabularyData = [
+            { word: "Ahmad", arabic: "أحمد (مذكر مفرد)", pronoun: "He", icon: "fa-user-large" },
+            { word: "Damascus", arabic: "دمشق (مكان مفرد)", pronoun: "It", icon: "fa-city" },
+            { word: "The Teachers", arabic: "المعلمون (جمع عاقل)", pronoun: "They", icon: "fa-chalkboard-user" },
+            { word: "Maya", arabic: "مايا (مؤنث مفرد)", pronoun: "She", icon: "fa-user-nurse" },
+            { word: "The Cat", arabic: "القطة (غير عاقل مفرد)", pronoun: "It", icon: "fa-cat" },
+            { word: "Sami and I", arabic: "سامي وأنا (جمع يتضمن المتكلم)", pronoun: "We", icon: "fa-people-group" },
+            { word: "The Books", arabic: "الكتب (جمع غير عاقل)", pronoun: "They", icon: "fa-books" },
+            { word: "My Sister", arabic: "أختي (مؤنث مفرد)", pronoun: "She", icon: "fa-person-dress" },
+            { word: "Palmyra", arabic: "تدمر (مدينة تاريخية)", pronoun: "It", icon: "fa-monument" },
+            { word: "My Father", arabic: "أبي (مذكر مفرد)", pronoun: "He", icon: "fa-user-tie" },
+            { word: "The Pupils", arabic: "التلاميذ (جمع)", pronoun: "They", icon: "fa-graduation-cap" },
+            { word: "My Family and I", arabic: "عائلتي وأنا", pronoun: "We", icon: "fa-house-chimney-user" }
+        ];
+
+        const sentenceData = [
+            {
+                template: "... is a historical city in Syria.",
+                subject: "Palmyra",
+                arabicSub: "تدمر - مدينة مفرد غير عاقل",
+                correct: "It",
+                options: ["He", "She", "It", "They"],
+                explanation: "استخدمنا (It) لأن 'تدمر' اسم مكان مفرد غير عاقل."
+            },
+            {
+                template: "... are reading English stories.",
+                subject: "The Students",
+                arabicSub: "الطلاب - اسم جمع",
+                correct: "They",
+                options: ["He", "She", "It", "They"],
+                explanation: "استخدمنا (They) لأن 'الطلاب' اسم جمع."
+            },
+            {
+                template: "... is a helpful teacher.",
+                subject: "Mr. Ahmad",
+                arabicSub: "الأستاذ أحمد - مفرد مذكر",
+                correct: "He",
+                options: ["He", "She", "It", "We"],
+                explanation: "استخدمنا (He) لأن الفاعل مذكر مفرد."
+            },
+            {
+                template: "... love Syria very much.",
+                subject: "My friends and I",
+                arabicSub: "أصدقائي وأنا - جمع يتضمن المتكلم",
+                correct: "We",
+                options: ["They", "We", "You", "It"],
+                explanation: "استخدمنا (We) لأن الفاعل يحتوي على 'وأنا' (and I)."
+            },
+            {
+                template: "... visits Krak des Chevaliers.",
+                subject: "Salma",
+                arabicSub: "سلمى - مفرد مؤنث",
+                correct: "She",
+                options: ["He", "She", "It", "They"],
+                explanation: "استخدمنا (She) لأن الفاعل مفرد مؤنث."
+            },
+            {
+                template: "... are on the classroom table.",
+                subject: "The Pens",
+                arabicSub: "الأقلام - جمع غير عاقل",
+                correct: "They",
+                options: ["It", "They", "We", "He"],
+                explanation: "تذكر دائماً: (They) تُستخدم للجمع غير العاقل أيضاً وليس فقط للأشخاص!"
+            }
+        ];
+
+        const motivationalPhrases = [
+            "أحسنت يا بطل القواعد! 🌟",
+            "ممتاز جداً! إجابة متميزة! 🎯",
+            "عبقري الإنجليزية الصغير! 🚀",
+            "رائع! يستحق وسام التفوق! 🎖️",
+            "إجابة صحيحة دقيقة! واصل التألق! 💎",
+            "عمل مذهل يا نجم الصف! ⭐",
+            "أحسنت الاستيعاب والتركيز! 👏"
+        ];
+
+        // State Tracking
+        let score = 0;
+        let streak = 0;
+        let activeMode = 'matching';
+        let currentFillIndex = 0;
+        let speedTimer = null;
+        let speedTimeLeft = 10;
+        let currentSpeedIndex = 0;
+        let speedQuestions = [];
+
+        // App Initialization
+        window.onload = () => {
+            initMatchingMode();
+        };
+
+        function updateStats() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('streak-display').innerText = `🔥 ${streak}`;
+        }
+
+        function getRandomMotivation() {
+            return motivationalPhrases[Math.floor(Math.random() * motivationalPhrases.length)];
+        }
+
+        // Mode Switching
+        function switchMode(mode) {
+            activeMode = mode;
+            document.querySelectorAll('.game-mode').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.mode-tab').forEach(el => {
+                el.classList.remove('bg-yellow-400', 'text-indigo-950', 'border-yellow-300');
+                el.classList.add('bg-indigo-800/80', 'text-white', 'border-transparent');
+            });
+
+            const activeTab = document.getElementById(`tab-${mode}`);
+            activeTab.classList.remove('bg-indigo-800/80', 'text-white', 'border-transparent');
+            activeTab.classList.add('bg-yellow-400', 'text-indigo-950', 'border-yellow-300');
+
+            document.getElementById(`mode-${mode}`).classList.remove('hidden');
+
+            if (mode === 'matching') initMatchingMode();
+            if (mode === 'fill') initFillMode();
+            if (mode === 'speed') initSpeedMode();
+        }
+
+        /* ---------------- MODE 1: MATCHING / DRAG & DROP ---------------- */
+        function initMatchingMode() {
+            const pool = document.getElementById('words-pool');
+            const basketsContainer = document.getElementById('baskets-container');
+            pool.innerHTML = '';
+            basketsContainer.innerHTML = '';
+
+            const activePronouns = ["He", "She", "It", "They", "We"];
+
+            // Render Baskets
+            activePronouns.forEach(pronoun => {
+                const basket = document.createElement('div');
+                basket.className = "bg-white/90 border-2 border-indigo-200 rounded-2xl p-3 min-h-[140px] flex flex-col items-center transition duration-200 relative";
+                basket.dataset.pronoun = pronoun;
+                basket.ondragover = (e) => { e.preventDefault(); basket.classList.add('drag-over'); };
+                basket.ondragleave = () => basket.classList.remove('drag-over');
+                basket.ondrop = (e) => handleDrop(e, pronoun, basket);
+
+                basket.innerHTML = `
+                    <div class="bg-indigo-900 text-yellow-300 en-font text-xl font-black px-4 py-1 rounded-full shadow-md mb-2">
+                        ${pronoun}
+                    </div>
+                    <div class="cards-holder flex flex-wrap gap-1 justify-center w-full"></div>
+                `;
+                basketsContainer.appendChild(basket);
+            });
+
+            // Render Word Cards
+            const shuffled = [...vocabularyData].sort(() => 0.5 - Math.random()).slice(0, 8);
+            shuffled.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.id = `card-${idx}`;
+                card.draggable = true;
+                card.className = "bg-white border-2 border-indigo-300 rounded-xl p-2.5 shadow-md cursor-grab active:cursor-grabbing flex items-center gap-2 transition hover:scale-105";
+                card.ondragstart = (e) => {
+                    e.dataTransfer.setData("text/plain", JSON.stringify(item));
+                    e.dataTransfer.setData("card-id", card.id);
+                };
+
+                card.innerHTML = `
+                    <button onclick="speakEnglish('${item.word}')" class="text-indigo-600 hover:text-indigo-800 p-1">
+                        <i class="fa-solid fa-volume-high text-xs"></i>
+                    </button>
+                    <div class="text-right">
+                        <div class="en-font font-black text-indigo-950 text-sm leading-none" dir="ltr">${item.word}</div>
+                        <div class="text-[10px] text-gray-500 font-bold">${item.arabic}</div>
+                    </div>
+                `;
+                pool.appendChild(card);
+            });
+        }
+
+        function handleDrop(e, basketPronoun, basketElem) {
+            e.preventDefault();
+            basketElem.classList.remove('drag-over');
+            const itemData = JSON.parse(e.dataTransfer.getData("text/plain"));
+            const cardId = e.dataTransfer.getData("card-id");
+            const cardElem = document.getElementById(cardId);
+
+            if (itemData.pronoun === basketPronoun) {
+                // Correct Match
+                AudioFX.playCorrect();
+                score += 10;
+                streak++;
+                updateStats();
+
+                // Move Card into Basket
+                if(cardElem) cardElem.remove();
+                const placedCard = document.createElement('div');
+                placedCard.className = "bg-emerald-100 border border-emerald-400 text-emerald-950 rounded-lg text-xs font-bold px-2 py-1 flex items-center gap-1 my-0.5 animate-bounce";
+                placedCard.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> ${itemData.word}`;
+                basketElem.querySelector('.cards-holder').appendChild(placedCard);
+
+                showMotivationModal("مطابقة ممتازة!", `الاسم <b>${itemData.word}</b> يتطابق تماماً مع الضمير <b>(${basketPronoun})</b>.`);
+
+                // Check if pool empty
+                if (document.getElementById('words-pool').children.length === 0) {
+                    setTimeout(() => {
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        initMatchingMode();
+                    }, 1200);
+                }
+            } else {
+                // Wrong Match
+                AudioFX.playWrong();
+                streak = 0;
+                updateStats();
+                alert(`حاول مجدداً! الكلمة (${itemData.word}) لا تناسب الضمير (${basketPronoun}).`);
+            }
+        }
+
+        /* ---------------- MODE 2: FILL IN THE BLANKS ---------------- */
+        function initFillMode() {
+            currentFillIndex = 0;
+            loadFillQuestion();
+        }
+
+        function loadFillQuestion() {
+            const q = sentenceData[currentFillIndex];
+            document.getElementById('fill-sentence').innerText = q.template;
+            document.getElementById('fill-context').innerText = `الفاعل المطلوب استبداله: ( ${q.subject} - ${q.arabicSub} )`;
+
+            const optionsContainer = document.getElementById('fill-options');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "en-font bg-white hover:bg-indigo-600 hover:text-white text-indigo-950 font-black text-2xl py-4 rounded-2xl border-2 border-indigo-200 shadow-lg transition transform hover:-translate-y-1";
+                btn.innerText = opt;
+                btn.onclick = () => checkFillAnswer(opt, q);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function speakSentence() {
+            const q = sentenceData[currentFillIndex];
+            const fullText = q.template.replace('...', q.correct) + " " + q.subject;
+            speakEnglish(fullText);
+        }
+
+        function checkFillAnswer(selected, question) {
+            if (selected === question.correct) {
+                AudioFX.playCorrect();
+                score += 15;
+                streak++;
+                updateStats();
+
+                showMotivationModal(getRandomMotivation(), question.explanation);
+
+                currentFillIndex = (currentFillIndex + 1) % sentenceData.length;
+                loadFillQuestion();
+            } else {
+                AudioFX.playWrong();
+                streak = 0;
+                updateStats();
+                alert(`إجابة غير صحيحة! الضمير المناسب للكلمة (${question.subject}) هو (${question.correct}).`);
+            }
+        }
+
+        /* ---------------- MODE 3: SPEED CHALLENGE ---------------- */
+        function initSpeedMode() {
+            speedQuestions = [...vocabularyData].sort(() => 0.5 - Math.random());
+            currentSpeedIndex = 0;
+            loadSpeedQuestion();
+        }
+
+        function loadSpeedQuestion() {
+            if (currentSpeedIndex >= speedQuestions.length) {
+                confetti({ particleCount: 150, spread: 80 });
+                alert(`انتهى تحدي السرعة! مجموع نقاطك الإجمالي: ${score}`);
+                initSpeedMode();
+                return;
+            }
+
+            const q = speedQuestions[currentSpeedIndex];
+            document.getElementById('speed-q-num').innerText = currentSpeedIndex + 1;
+            document.getElementById('speed-word').innerText = q.word;
+            document.getElementById('speed-subtext').innerText = `( ${q.arabic} )`;
+
+            const allPronouns = ["He", "She", "It", "They", "We", "I"];
+            const options = Array.from(new Set([q.pronoun, ...allPronouns.sort(() => 0.5 - Math.random())])).slice(0, 4).sort(() => 0.5 - Math.random());
+
+            const container = document.getElementById('speed-options');
+            container.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "en-font bg-white hover:bg-yellow-400 hover:text-indigo-950 text-indigo-900 font-black text-2xl py-3 rounded-2xl border-2 border-indigo-200 shadow-md transition";
+                btn.innerText = opt;
+                btn.onclick = () => checkSpeedAnswer(opt, q.pronoun);
+                container.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(speedTimer);
+            speedTimeLeft = 10;
+            const bar = document.getElementById('speed-timer-bar');
+            const secDisplay = document.getElementById('timer-sec');
+
+            speedTimer = setInterval(() => {
+                speedTimeLeft -= 0.1;
+                secDisplay.innerText = Math.max(0, Math.ceil(speedTimeLeft));
+                bar.style.width = `${(speedTimeLeft / 10) * 100}%`;
+
+                if (speedTimeLeft <= 0) {
+                    clearInterval(speedTimer);
+                    AudioFX.playWrong();
+                    streak = 0;
+                    updateStats();
+                    currentSpeedIndex++;
+                    loadSpeedQuestion();
+                }
+            }, 100);
+        }
+
+        function checkSpeedAnswer(selected, correct) {
+            clearInterval(speedTimer);
+            if (selected === correct) {
+                AudioFX.playCorrect();
+                score += 20;
+                streak++;
+                updateStats();
+                showMotivationModal(getRandomMotivation(), `إجابة سريعة ودقيقة! ⚡ الضمير الصحيح هو <b>(${correct})</b>.`);
+            } else {
+                AudioFX.playWrong();
+                streak = 0;
+                updateStats();
+                alert(`انتهى الوقت أو كانت الإجابة خاطئة! الضمير الصحيح هو (${correct}).`);
+            }
+            currentSpeedIndex++;
+            loadSpeedQuestion();
+        }
+
+        /* ---------------- MODALS & POPUPS ---------------- */
+        function showMotivationModal(phrase, explanation) {
+            document.getElementById('modal-arabic-phrase').innerText = phrase;
+            document.getElementById('modal-explanation').innerHTML = explanation;
+            document.getElementById('motivation-modal').classList.remove('hidden');
+
+            // Trigger Fireworks / Confetti
+            confetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 }
+            });
+            confetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 }
+            });
+        }
+
+        function closeMotivationModal() {
+            document.getElementById('motivation-modal').classList.add('hidden');
+        }
+
+        function openRulesModal() {
+            document.getElementById('rules-modal').classList.remove('hidden');
+        }
+
+        function closeRulesModal() {
+            document.getElementById('rules-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
